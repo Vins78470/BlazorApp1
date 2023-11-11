@@ -1,0 +1,172 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Jeu du Morpion</h1>
+
+<body>
+
+    <p>Le créateur s'appelle @("vincent")</p>
+
+    <EditForm Model="@player1">
+        <label for="choose_name">Choisis ton symbole joueur 1:</label>
+        <input type="text" id="choose_name" @bind="@player1.Name" />
+        <button class="test" type="button" @onclick="ChangeNamePlayer1">Valider</button>
+    </EditForm>
+
+    <EditForm Model="@player2">
+        <label for="choose_name">Choisis ton symbole joueur 2:</label>
+        <input type="text" id="choose_name" @bind="@player2.Name" />
+        <button class="test" type="button" @onclick="ChangeNamePlayer2">Valider</button>
+    </EditForm>
+
+
+
+    @if (!string.IsNullOrWhiteSpace(player2.Name) && !string.IsNullOrWhiteSpace(player1.Name))
+    {
+        <p>Le joueur 1 est @player1.Name</p>
+        <p>Le joueur 2 est @player2.Name</p>
+        <p> Voici le Jeu du Morpion : </p>
+
+
+
+        <p>ETAT DU MATCH :  
+             @if (CheckForWinner())
+            {
+                <h5>Gagné</h5>
+
+                <button @onclick="OnInitialized" class="test" >Recommencez</button>
+            }
+
+            @if (IsBoardFull())
+                {
+                    <h5>Match nul</h5>
+
+                }
+        </p>
+
+        <table class="Board">
+            @for (int i = 0; i < 3; i++)
+            {
+                <tr>
+                    @for (int j = 0; j < 3; j++)
+                    {
+                        int localI = i; // Créez une variable locale pour capturer la valeur correcte de i
+                        int localJ = j; // Créez une variable locale pour capturer la valeur correcte de j
+
+                        <td @onclick="() => ChangeSymbol(localI, localJ)">@Board[i, j]</td>
+                    }
+                </tr>
+            }
+        </table>
+    }
+
+    
+    @code {
+
+        public class UserInfo
+        {
+            public string Name { get; set; }
+            public int Age { get; set; }
+            public int Score { get; set; }
+            public char Symbol { get; set; }
+        }
+
+        private UserInfo player1 = new UserInfo();
+        private UserInfo player2 = new UserInfo();
+        public static bool check = false;
+
+        public static bool joueur1HasPlayed = false;
+        public static bool joueur2HasPlayed = false;
+
+        public static string[,] Board = { { "", "", "" }, { "", "", "" }, { "", "", "" } };
+
+     
+        
+
+        protected override void OnInitialized()
+        {
+            ResetBoard();
+        }
+
+        private void ResetBoard()
+        {
+            // Réinitialisez le tableau
+            Board = new string[3, 3];
+        }
+
+        private void ChangeNamePlayer1()
+        {
+            // Logique pour le changement de nom du joueur 1
+            Console.WriteLine($"{player1.Name} a changé de nom.");
+        }
+
+        private void ChangeNamePlayer2()
+        {
+            // Logique pour le changement de nom du joueur 2
+            Console.WriteLine($"{player2.Name} a changé de nom.");
+        }
+
+        public void ChangeSymbol( int i, int j)
+        {
+            if (joueur1HasPlayed == false && string.IsNullOrWhiteSpace(Board[i,j]))
+            {
+                Board[i, j] = "X"; 
+                joueur1HasPlayed = true;
+                joueur2HasPlayed = false;
+            }
+            else if (joueur2HasPlayed == false && string.IsNullOrWhiteSpace(Board[i,j]))
+            {
+                Board[i, j] = "O";
+                joueur2HasPlayed = true;
+                joueur1HasPlayed = false;
+            }
+
+
+        }
+
+
+        public static  bool IsBoardFull()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (string.IsNullOrWhiteSpace(Board[i, j]))
+                    {
+                        return false; // S'il y a une case vide, le tableau n'est pas plein
+                    }
+                }
+            }
+            return true; // Aucune case vide trouvée, le tableau est plein
+        }
+
+public bool CheckForWinner()
+{
+    // Vérifier les lignes horizontales et verticales
+    for (int i = 0; i < 3; i++)
+    {
+        // Vérifier l'alignement horizontal et vertical
+        if ((Board[i, 0] != "" && Board[i, 0] == Board[i, 1] && Board[i, 1] == Board[i, 2] && !string.IsNullOrWhiteSpace(Board[i, 0])) ||
+            (Board[0, i] != "" && Board[0, i] == Board[1, i] && Board[1, i] == Board[2, i] && !string.IsNullOrWhiteSpace(Board[0, i])))
+        {
+            return true;
+        }
+    }
+
+    // Vérifier les diagonales
+    if ((Board[0, 0] != "" && Board[0, 0] == Board[1, 1] && Board[1, 1] == Board[2, 2] && !string.IsNullOrWhiteSpace(Board[0, 0])) ||
+        (Board[0, 2] != "" && Board[0, 2] == Board[1, 1] && Board[1, 1] == Board[2, 0] && !string.IsNullOrWhiteSpace(Board[0, 2])))
+    {
+        return true;
+    }
+
+    // Aucune condition de victoire trouvée
+    return false;
+}
+
+
+
+}
+
+</body>
